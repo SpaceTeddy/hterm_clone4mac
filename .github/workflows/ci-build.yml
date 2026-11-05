@@ -1,0 +1,45 @@
+name: macOS Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version label for the app (e.g. 0.2.0-test); empty = latest tag"
+        required: false
+        default: ""
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0  # full history for build number and tags
+
+      - name: Show Swift version
+        run: swift --version
+
+      - name: Build app
+        env:
+          HARDTERM_VERSION: ${{ github.event.inputs.version }}
+        run: ./build_app.sh
+
+      - name: Package app
+        id: pkg
+        shell: bash
+        run: |
+          VERSION=$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" build/Hardterm.app/Contents/Info.plist)
+          ZIP="Hardterm-${VERSION}-$(git rev-parse --short HEAD)-macOS-arm64.zip"
+          ditto -c -k --keepParent build/Hardterm.app "$ZIP"
+          ls -lh "$ZIP"
+          echo "zip=$ZIP" >> "$GITHUB_OUTPUT"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.pkg.outputs.zip }}
+          path: ${{ steps.pkg.outputs.zip }}

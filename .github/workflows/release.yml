@@ -1,0 +1,89 @@
+name: macOS Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release tag (e.g. v1.3.0)"
+        required: true
+      prerelease:
+        description: "Mark as pre-release"
+        required: true
+        default: "false"
+      generate_notes:
+        description: "Use GitHub auto-generated release notes"
+        required: true
+        default: "true"
+
+permissions:
+  contents: write
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  release:
+    runs-on: macos-15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0  # full history for build number and tags
+
+      - name: Resolve build metadata
+        id: meta
+        shell: bash
+        run: |
+          VERSION_INPUT="${{ github.event.inputs.version }}"
+          if [ -n "$VERSION_INPUT" ]; then
+            TAG="$VERSION_INPUT"
+          else
+            TAG="${GITHUB_REF_NAME}"
+          fi
+          VERSION="${TAG#v}"
+
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Build app
+        env:
+          HARDTERM_VERSION: ${{ steps.meta.outputs.version }}
+        run: ./build_app.sh
+
+      - name: Package app
+        id: pkg
+        shell: bash
+        run: |
+          ZIP="Hardterm-${{ steps.meta.outputs.version }}-macOS-arm64.zip"
+          ditto -c -k --keepParent build/Hardterm.app "$ZIP"
+          ls -lh "$ZIP"
+          echo "path=$ZIP" >> "$GITHUB_OUTPUT"
+
+      - name: Create or update GitHub release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.meta.outputs.tag }}
+          PRERELEASE: ${{ github.event.inputs.prerelease }}
+          GENERATE_NOTES: ${{ github.event.inputs.generate_notes }}
+          ZIP_PATH: ${{ steps.pkg.outputs.path }}
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists, updating asset..."
+            gh release upload "$TAG" "$ZIP_PATH" --clobber
+          else
+            EXTRA_ARGS=()
+            [ "$PRERELEASE" = "true" ] && EXTRA_ARGS+=("--prerelease")
+            if [ "$GENERATE_NOTES" != "false" ]; then
+              EXTRA_ARGS+=("--generate-notes")
+            else
+              EXTRA_ARGS+=("--notes" "Automated release for ${TAG}")
+            fi
+            gh release create "$TAG" "$ZIP_PATH" \
+              --target "$GITHUB_SHA" \
+              --title "Hardterm $TAG" \
+              "${EXTRA_ARGS[@]}"
+          fi

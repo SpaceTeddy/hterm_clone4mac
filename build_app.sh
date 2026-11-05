@@ -3,13 +3,13 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
-# Version: HARDTERM_VERSION (z. B. aus CI) > Git-Tag vX.Y.Z auf HEAD > Datei VERSION
+# Version: HARDTERM_VERSION (z. B. aus CI) > letzter Git-Tag vX.Y.Z > Wert aus Info.plist
 VERSION="${HARDTERM_VERSION:-}"
 if [ -z "$VERSION" ]; then
-    TAG="$(git describe --tags --exact-match --match 'v[0-9]*' 2>/dev/null || true)"
+    TAG="$(git describe --tags --abbrev=0 --match 'v[0-9]*' 2>/dev/null || true)"
     VERSION="${TAG#v}"
 fi
-[ -n "$VERSION" ] || VERSION="$(tr -d '[:space:]' < VERSION)"
+[ -n "$VERSION" ] || VERSION="$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" Resources/Info.plist)"
 # Build-Nummer: Anzahl der Commits (fortlaufend), ohne Git 1
 BUILD="$(git rev-list --count HEAD 2>/dev/null || echo 1)"
 

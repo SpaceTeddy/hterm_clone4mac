@@ -15,18 +15,14 @@ If you copy the app to another Mac: `xattr -cr Hardterm.app`.
 
 ## Versioning & Releases
 
-The version number lives in the `VERSION` file (semantic versioning, e.g. `0.1.0`). `build_app.sh` writes it into the app's `Info.plist`; the build number is the git commit count.
+The version is taken from git tags (`vX.Y.Z`). `build_app.sh` writes it into the app's `Info.plist` (override with `HARDTERM_VERSION=1.2.3 ./build_app.sh`); the build number is the git commit count.
 
-A GitHub Actions workflow (`.github/workflows/build.yml`) builds the app on every push to `main` and every pull request, and attaches the zipped app as a workflow artifact.
+Builds run on GitHub Actions only when triggered manually (Actions tab → "Run workflow"):
 
-To publish a release:
+- **macOS Build** (`ci-build.yml`): builds the app and attaches the zipped app as a workflow artifact. Optional input: a version label.
+- **macOS Release** (`release.yml`): builds the app and creates (or updates) a GitHub release with `Hardterm-X.Y.Z-macOS-arm64.zip`. Inputs: release tag (e.g. `v0.2.0`), pre-release flag, auto-generated release notes. Pushing a tag `v*` starts it as well.
 
-    echo "0.2.0" > VERSION
-    git commit -am "Release 0.2.0"
-    git tag v0.2.0
-    git push && git push --tags
-
-The tag must match `VERSION`; the workflow then creates a GitHub release with `Hardterm-0.2.0-macOS-arm64.zip` and auto-generated release notes. The app is ad-hoc signed only (not notarized), so users need to run `xattr -cr Hardterm.app` after downloading.
+The app is ad-hoc signed only (not notarized), so users need to run `xattr -cr Hardterm.app` after downloading.
 
 ## Tabs: Serial, Telnet, SSH
 
