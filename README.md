@@ -13,6 +13,21 @@ Requirements: Xcode or Command Line Tools (Swift 5.9+), macOS 14+.
 For quick testing, `swift run` works too.
 If you copy the app to another Mac: `xattr -cr Hardterm.app`.
 
+## Versioning & Releases
+
+The version number lives in the `VERSION` file (semantic versioning, e.g. `0.1.0`). `build_app.sh` writes it into the app's `Info.plist`; the build number is the git commit count.
+
+A GitHub Actions workflow (`.github/workflows/build.yml`) builds the app on every push to `main` and every pull request, and attaches the zipped app as a workflow artifact.
+
+To publish a release:
+
+    echo "0.2.0" > VERSION
+    git commit -am "Release 0.2.0"
+    git tag v0.2.0
+    git push && git push --tags
+
+The tag must match `VERSION`; the workflow then creates a GitHub release with `Hardterm-0.2.0-macOS-arm64.zip` and auto-generated release notes. The app is ad-hoc signed only (not notarized), so users need to run `xattr -cr Hardterm.app` after downloading.
+
 ## Tabs: Serial, Telnet, SSH
 
 Use "+" in the tab bar (⌘T serial, ⇧⌘T Telnet, ⌥⌘T SSH) to open additional tabs. Each tab has its own connection, input/output, counters and script run; tabs are restored on relaunch (without connecting automatically).
