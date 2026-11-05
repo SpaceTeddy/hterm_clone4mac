@@ -1,82 +1,94 @@
 # Hardterm
 
-Natives serielles Terminal für macOS (Apple Silicon), SwiftUI + POSIX-termios, ohne Abhängigkeiten.
+Native serial terminal for macOS (Apple Silicon), SwiftUI + POSIX termios, no dependencies.
 
-## Bauen & Starten
+## Build & Run
 
-Voraussetzung: Xcode oder Command Line Tools (Swift 5.9+), macOS 14+.
+Requirements: Xcode or Command Line Tools (Swift 5.9+), macOS 14+.
 
     chmod +x build_app.sh
     ./build_app.sh
     open build/Hardterm.app
 
-Zum schnellen Testen geht auch `swift run`.
-Wird die App auf einen anderen Mac kopiert: `xattr -cr Hardterm.app`.
+For quick testing, `swift run` works too.
+If you copy the app to another Mac: `xattr -cr Hardterm.app`.
 
-## Tabs: Seriell, Telnet, SSH
+## Tabs: Serial, Telnet, SSH
 
-Mit „+“ in der Tab-Leiste (⌘T seriell, ⇧⌘T Telnet, ⌥⌘T SSH) öffnest du weitere Tabs. Jeder Tab hat eigene Verbindung, Ein-/Ausgabe, Zähler und Skript-Lauf; die Tabs werden beim Neustart wiederhergestellt (ohne automatisch zu verbinden).
+Use "+" in the tab bar (⌘T serial, ⇧⌘T Telnet, ⌥⌘T SSH) to open additional tabs. Each tab has its own connection, input/output, counters and script run; tabs are restored on relaunch (without connecting automatically).
 
-Telnet- und SSH-Tabs sind eine **echte Terminal-Konsole** (kein Eingabefeld): Tastendrücke gehen direkt an die Verbindung, Passwortabfragen erscheinen direkt im Terminal, Scrollback per Mausrad oder ⇧Bild↑/↓, Markieren mit der Maus, ⌘C/⌘V. Eingebaut ist ein xterm-kompatibler Emulator (Farben inkl. 256/TrueColor, Cursor, Scrollbereiche, Alternate Screen), daher laufen auch vim, top, less, htop und Tab-Vervollständigung. Die Fenstergröße wird an die Gegenseite gemeldet.
+Telnet and SSH tabs are a **real terminal console** (no input field): keystrokes go straight to the connection, password prompts appear directly in the terminal, scrollback via mouse wheel or ⇧PageUp/PageDown, selection with the mouse, ⌘C/⌘V. A built-in xterm-compatible emulator (colors incl. 256/TrueColor, cursor, scroll regions, alternate screen) means vim, top, less, htop and tab completion work as well. The window size is reported to the remote side.
 
-- **Telnet**: Host und Port (Standard 23); verhandelt ECHO, SGA, Terminal-Typ (xterm-256color) und Fenstergröße (NAWS). Enter sendet CR LF. „Lokales Echo“ für Server, die nicht selbst zurückschreiben (Roh-TCP-Konsolen).
-- **SSH**: nutzt das System-`ssh` in einem eigenen Pseudo-Terminal (dafür wird `/usr/bin/perl` benutzt; ohne Perl Ersatz über `script` mit fester Größe). Felder: Host, Port, Benutzer, Schlüsseldatei, zusätzliche Optionen (z. B. `-J jump`).
-- Grenzen: keine Maus-Weitergabe an Programme, keine Sixel/Grafik, Breitzeichen (CJK/Emoji) werden einspaltig dargestellt.
-- Die Optionen/Eingabefelder (Hex-Ansicht, Historie usw.) gibt es nur im seriellen Tab.
+- **Telnet**: host and port (default 23); negotiates ECHO, SGA, terminal type (xterm-256color) and window size (NAWS). Enter sends CR LF. "Local echo" for servers that don't echo back themselves (raw TCP consoles).
+- **SSH**: uses the system `ssh` in its own pseudo-terminal (via `/usr/bin/perl`; without Perl, falls back to `script` with a fixed size). Fields: host, port, user, key file, additional options (e.g. `-J jump`).
+- Limitations: no mouse passthrough to programs, no Sixel/graphics, wide characters (CJK/emoji) are rendered single-width.
+- The options/input fields (hex view, history, etc.) are only available in the serial tab.
 
-## Makros und Verbindungsmanager
+## Macros and Connection Manager
 
-- **Makro-Leiste** in jedem Tab: ein Klick sendet Text (Escapes `\r \n \t \xNN`) oder Hex-Bytes, optional mit Zeilenende. Anlegen/Sortieren über „Bearbeiten“ in der Leiste oder Menü Ablage → „Makros bearbeiten …“. Makros gelten für alle Tabs.
-- **Verbindungsmanager** (⇧⌘O oder Werkzeugleiste „Verbindungen“): Telnet-/SSH-Ziele speichern, bearbeiten, löschen; „Verbinden“ öffnet einen neuen Tab, „Im aktuellen Tab laden“ ersetzt die Daten des aktuellen Tabs. Der Stern in der Verbindungsleiste speichert den aktuellen Tab. Das „+“ in der Tab-Leiste listet gespeicherte Verbindungen zum direkten Öffnen. Passwörter werden nie gespeichert.
+- **Macro bar** in every tab: one click sends text (escapes `\r \n \t \xNN`) or hex bytes, optionally with a line ending. Create/reorder via "Edit" in the bar or File menu → "Edit Macros …". Macros apply to all tabs.
+- **Connection manager** (⇧⌘O or toolbar "Connections"): save, edit and delete Telnet/SSH targets; "Connect" opens a new tab, "Load into current tab" replaces the current tab's settings. The star in the connection bar saves the current tab. The "+" in the tab bar lists saved connections for opening directly. Passwords are never stored.
 
-## Darstellung
+## Appearance
 
-Einstellungen (⌘, oder Werkzeugleiste → Mehr → „Darstellung …“): Schriftart (alle installierten Monospace-Schriften), Größe, Textfarbe, Hintergrundfarbe, fertige Farbschemata (Dunkel, Hell, Grün auf Schwarz, Amber, Solarized Dark, Dracula) und Deckkraft der Terminal- und Textflächen (30–100 %, darunter scheint der Desktop durch; Bedienelemente bleiben deckend). Gilt für die Terminalansicht (Telnet/SSH) und die Textansicht (seriell); die Zellenansicht behält ihre Farben.
+Settings (⌘, or toolbar → More → "Appearance …"): font (all installed monospace fonts), size, text color, background color, preset color schemes (Dark, Light, Green on Black, Amber, Solarized Dark, Dracula) and opacity of the terminal and text areas (30–100 %, the desktop shows through below that; controls stay opaque). Applies to the terminal view (Telnet/SSH) and the text view (serial); the cell view keeps its colors.
 
-## Sprachen
+## Languages
 
-Die Oberfläche folgt der Spracheinstellung des Macs (Systemeinstellungen → Allgemein → Sprache & Region): **Deutsch, Englisch, Französisch, Spanisch, Italienisch**; alle anderen Sprachen zeigen Englisch. Die Übersetzungen liegen in `Resources/<sprache>.lproj/Localizable.strings` (Schlüssel = deutscher Originaltext) und werden von `build_app.sh` ins App-Bundle kopiert. Eine neue Sprache: Ordner `xx.lproj` mit übersetzter `Localizable.strings` anlegen und `xx` in `CFBundleLocalizations` (Info.plist) eintragen. Zum Testen einer anderen Sprache ohne Systemumstellung: `open build/Hardterm.app --args -AppleLanguages "(fr)"`.
-Bei `swift run` (ohne App-Bundle) bleibt die Oberfläche deutsch.
+The UI follows the Mac's language setting (System Settings → General → Language & Region): **German, English, French, Spanish, Italian**; all other languages show English. Translations live in `Resources/<language>.lproj/Localizable.strings` (key = original German text) and are copied into the app bundle by `build_app.sh`. To add a language: create a folder `xx.lproj` with a translated `Localizable.strings` and add `xx` to `CFBundleLocalizations` (Info.plist). To test another language without changing the system setting: `open build/Hardterm.app --args -AppleLanguages "(fr)"`.
+With `swift run` (no app bundle), the UI stays in German.
 
-## Funktionen
+## Features
 
-- Ports `/dev/cu.*` mit automatischer Aktualisierung, Hot-Unplug-Erkennung, optional automatisches Neuverbinden (z. B. bei ESP32-Reset)
-- Baudrate frei wählbar (auch nicht-standard), 5–8 Datenbits, 1–2 Stopbits, Parität, RTS/CTS bzw. XON/XOFF
-- DTR/RTS schalten, CTS/DSR/DCD/RI-Anzeige, Break senden
-- Aufbau wie HTerm: Verbindungsleiste, Allgemein (Zähler), Ausgabe-Optionen, Empfangene Daten, Eingabe-Optionen, Eingabe, Gesendete Daten, Statusleiste
-- Zwei Ansichten (Umschalter in den Ausgabe-Optionen): „Text“ (Standard) mit gut lesbaren, markier- und kopierbaren Zeilen, ⌘F-Suche, ANSI-Farben und einstellbarer Schriftgröße (⌘+ / ⌘−); „Zellen“ wie bei HTerm
-- Empfangene und gesendete Bytes als farbige Zellen (ASCII, Hex, Dez, Bin einzeln zuschaltbar); Rechtsklick auf eine Zeile: kopieren als ASCII/Hex/Dezimal/Binär
-- Zähler für Rx/Tx und für ein frei wählbares Byte (z. B. 13), automatisches Leeren ab N Bytes, Filter, Zeitstempel (ms)
-- Zeilenumbruch bei LF, CR, CR+LF, Zeitlücke oder nach N Bytes
-- Senden in ASCII (Escapes `\n \r \t \0 \\ \xNN`), Hex, Dez, Bin; Zeilenende beim Enter wählbar
-- Befehls-Historie: Pfeil hoch/runter im Eingabefeld, Verlaufsmenü (Uhr-Symbol) neben dem Feld, Anzeige „Historie n/Anzahl“ in der Statusleiste, bleibt über Neustarts erhalten (letzte 50)
-- Datei senden, Rohdaten-Mitschnitt in Datei, Verlauf kopieren/exportieren
-- Profile als JSON speichern/laden, Einstellungen werden automatisch gemerkt
+- Ports `/dev/cu.*` with automatic refresh, hot-unplug detection, optional automatic reconnect (e.g. on ESP32 reset)
+- Freely selectable baud rate (including non-standard), 5–8 data bits, 1–2 stop bits, parity, RTS/CTS or XON/XOFF
+- Toggle DTR/RTS, CTS/DSR/DCD/RI indicators, send break
+- Layout like HTerm: connection bar, general (counters), output options, received data, input options, input, sent data, status bar
+- Two views (switch in the output options): "Text" (default) with readable, selectable and copyable lines, ⌘F search, ANSI colors and adjustable font size (⌘+ / ⌘−); "Cells" like HTerm
+- Received and sent bytes as colored cells (ASCII, hex, dec, bin individually toggleable); right-click a line: copy as ASCII/hex/decimal/binary
+- Counters for Rx/Tx and for a freely selectable byte (e.g. 13), auto-clear after N bytes, filter, timestamps (ms)
+- Line break on LF, CR, CR+LF, time gap or after N bytes
+- Send as ASCII (escapes `\n \r \t \0 \\ \xNN`), hex, dec, bin; selectable line ending on Enter
+- Command history: arrow up/down in the input field, history menu (clock icon) next to the field, "History n/count" display in the status bar, persists across relaunches (last 50)
+- Send file, raw data capture to file, copy/export log
+- Save/load profiles as JSON, settings are remembered automatically
 
-## Skripte (JavaScript)
+## Scripts (JavaScript)
 
-Über die Werkzeugleiste „Skript“. Skripte laufen auf eigenem Thread, `sleep` und `waitFor` blockieren normal.
+Via the "Script" toolbar button. Scripts run on their own thread, so `sleep` and `waitFor` block normally.
 
-| Funktion | Bedeutung |
-|---|---|
-| `send(text)` | Text senden (JS-Escapes wie `"\r\n"` funktionieren) |
-| `sendHex("AA BB")` | Bytes aus Hex senden |
-| `sendBytes([1,2,3])` | Bytes aus Array senden |
-| `waitFor(text, timeoutMs)` | wartet auf Text; gibt empfangenen Text bis inkl. Treffer zurück oder `null` |
+| Function | Meaning |
+| --- | --- |
+| `send(text)` | Send text (JS escapes like `"\r\n"` work) |
+| `sendHex("AA BB")` | Send bytes from hex |
+| `sendBytes([1,2,3])` | Send bytes from an array |
+| `waitFor(text, timeoutMs)` | Waits for text; returns received text up to and including the match, or `null` |
 | `sleep(ms)` | Pause |
-| `flush()` / `received()` | Skript-Empfangspuffer leeren / komplett entnehmen |
-| `log(x)`, `clear()`, `connected()` | Ausgabe im Terminal, Terminal leeren, Verbindungsstatus |
+| `flush()` / `received()` | Clear / take the entire script receive buffer |
+| `log(x)`, `clear()`, `connected()` | Print to terminal, clear terminal, connection status |
 
-Beispiel:
+Example:
 
     flush();
     send("AT\r\n");
     if (waitFor("OK", 2000) === null) log("Timeout");
 
-## Aufbau
+## Acknowledgements: HTerm
 
-- `SerialPort.swift` termios, Lesen/Schreiben, Steuerleitungen
-- `Session.swift` Zustand, Zeilenpuffer, Senden, Mitschnitt, Skriptstart
-- `ScriptRunner.swift` JavaScriptCore-Anbindung
-- `Formatting.swift` Darstellung und Eingabe-Parser
+Hardterm would not exist without **[HTerm](https://www.der-hammer.info/pages/terminal.html)** by **Tobias Hammer**.
+
+For many years, HTerm has been the go-to tool for anyone working with serial interfaces: microcontroller tinkerers, embedded developers, hardware engineers and students alike. Its brilliance lies in a rare combination: it shows exactly what is happening on the wire — byte by byte, in ASCII, hex, decimal and binary side by side — while remaining fast, lightweight and refreshingly free of clutter. Counters, flexible line breaks, sending in any number format, control line handling: everything you need when a board refuses to talk is right there, one click away. And it has been given to the community for free.
+
+The layout of Hardterm's serial tab — connection bar, counters, output options, received data, input options, input, sent data — is a deliberate homage to HTerm's thoughtful design. Hardterm is simply an attempt to bring that experience natively to macOS.
+
+Thank you, Tobias, for a tool that has saved countless hours of debugging and set the standard for what a serial terminal should be.
+
+*Hardterm is an independent project and is not affiliated with or endorsed by HTerm or its author.*
+
+## Structure
+
+- `SerialPort.swift` termios, reading/writing, control lines
+- `Session.swift` state, line buffer, sending, capture, script start
+- `ScriptRunner.swift` JavaScriptCore bridge
+- `Formatting.swift` display and input parsers
 - `ContentView.swift` UI
